@@ -60,7 +60,7 @@ if user_input:
 
     # Gerar resposta da IA
     response = client.responses.create(
-        model="gpt-4.1-mini",
+        model="gpt-4o-mini",
         input=[
             {"role": "system", "content": system_prompt},
             *st.session_state.messages
