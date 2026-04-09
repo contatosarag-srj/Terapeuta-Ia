@@ -59,6 +59,7 @@ if user_input:
         st.markdown(user_input)
 
     # Gerar resposta da IA
+    try:
     response = client.responses.create(
         model="gpt-4o-mini",
         input=[
@@ -68,6 +69,9 @@ if user_input:
     )
 
     resposta = response.output_text
+
+except Exception as e:
+    resposta = f"Erro: {str(e)}"
 
     # Salvar resposta
     st.session_state.messages.append({
