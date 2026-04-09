@@ -62,17 +62,14 @@ if user_input:
     try:
     response = client.responses.create(
         model="gpt-4o-mini",
-        input=[
-            {"role": "system", "content": system_prompt},
-            *st.session_state.messages
-        ]
+        input=mensagem
     )
-
+    
     resposta = response.output_text
+    st.write(resposta)
 
 except Exception as e:
-    resposta = f"Erro: {str(e)}"
-
+    st.error(f"Erro: {e}")
     # Salvar resposta
     st.session_state.messages.append({
         "role": "assistant",
