@@ -59,15 +59,23 @@ if user_input:
         st.markdown(user_input)
 
     # Gerar resposta da IA
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[
-            {"role": "system", "content": system_prompt},
-            *st.session_state.messages
-        ]
-    )
+    response = client.responses.create(
+    model="gpt-4.1-mini",
+    input=[
+        {"role": "system", "content": system_prompt},
+        *st.session_state.messages
+    ]
+)
 
-    resposta = response.choices[0].message.content
+resposta = response.output_text
+
+st.session_state.messages.append({
+    "role": "assistant",
+    "content": resposta
+})
+
+with st.chat_message("assistant"):
+    st.markdown(resposta)
 
     # Salvar resposta
     st.session_state.messages.append({
