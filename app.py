@@ -1,101 +1,80 @@
 import streamlit as st
-import random
+from openai import OpenAI
 
-class TerapeutaIA:
-
-    def detectar_emocao(self, texto):
-        texto = texto.lower()
-
-        emocoes = {
-            "tristeza": ["triste", "sozinho", "desanimado"],
-            "ansiedade": ["ansioso", "preocupado", "medo"],
-            "raiva": ["raiva", "irritado", "frustrado"],
-            "cansaço": ["cansado", "sobrecarregado"]
-        }
-
-        for emocao, palavras in emocoes.items():
-            if any(p in texto for p in palavras):
-                return emocao
-
-        return "reflexão"
-
-    def responder(self, texto):
-
-        emocao = self.detectar_emocao(texto)
-
-        respostas = {
-            "tristeza": "Sinto que existe tristeza no que você está dizendo.",
-            "ansiedade": "Percebo preocupação nessa situação.",
-            "raiva": "Entendo que isso pode ser frustrante.",
-            "cansaço": "Parece que você está sobrecarregado.",
-            "reflexão": "Entendo que isso é importante para você."
-        }
-
-        perguntas = [
-            "O que mais está te incomodando?",
-            "O que você gostaria que fosse diferente?",
-            "Quando isso começou?",
-            "Como isso afeta você?"
-        ]
-
-        sugestoes = [
-            "Respire fundo por alguns minutos.",
-            "Escreva seus pensamentos.",
-            "Dê um pequeno passo.",
-            "Seja gentil consigo mesmo."
-        ]
-
-        return f"""
-💙 {respostas[emocao]}
-
-🧠 {random.choice(perguntas)}
-
-🌱 {random.choice(sugestoes)}
-
-Estou aqui com você.
-"""
-
-
-st.title("🌿 Terapeuta IA")
-st.write("Um espaço seguro para conversar sem julgamentos")
-
-texto = st.text_area("Como você está se sentindo?")
-
-if st.button("Conversar"):
-    terapeuta = TerapeutaIA(system_prompt = """
-Você é uma terapeuta virtual empática, acolhedora e humana.
-Seu objetivo é ouvir, compreender e ajudar emocionalmente.
-
-Regras importantes:
-- Seja calorosa e gentil
-- Faça perguntas para entender melhor
-- Nunca seja fria ou robótica
-- Responda como uma terapeuta experiente
-- Use linguagem simples e humana
-- Demonstre empatia sempre
-
-Exemplo de comportamento:
-Usuário: Estou triste
-Você: Sinto muito que você esteja se sentindo assim. Quer me contar o que aconteceu?
-
-Você deve sempre conversar de forma natural e inteligente.
-""")
-    resposta = terapeuta.responder(response = client.chat.completions.create(
-    model="gpt-4o-mini",
-    messages=[
-        {"role": "system", "content": system_prompt},
-        *st.session_state.messages
-    ]
+# Configuração da página
+st.set_page_config(
+    page_title="Terapeuta IA",
+    page_icon="💬",
+    layout="centered"
 )
 
-reply = response.choices[0].message.content
-st.session_state.messages.append({"role": "assistant", "content": reply}))
-    st.success(resposta)
+st.title("💬 Terapeuta IA")
+st.write("Olá, estou aqui para conversar com você. Como você está se sentindo hoje?")
 
+# Inicializar cliente OpenAI
+client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+
+# Personalidade da terapeuta
+system_prompt = """
+Você é uma terapeuta virtual empática, gentil e humana.
+
+Seu objetivo é ouvir, acolher e ajudar emocionalmente.
+
+Regras:
+- Seja empática e acolhedora
+- Faça perguntas para entender melhor
+- Nunca seja fria ou robótica
+- Use linguagem simples e humana
+- Demonstre compreensão emocional
+- Seja gentil e respeitosa
+- Não dê conselhos médicos
+- Não substitua um profissional humano
+
+Exemplo:
+Usuário: Estou triste
+Você: Sinto muito que esteja se sentindo assim. Quer me contar o que aconteceu?
+"""
+
+# Memória da conversa
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-user_input = st.chat_input("Como você está se sentindo hoje?")
+# Mostrar mensagens anteriores
+for message in st.session_state.messages:
+    with st.chat_message(message["role"]):
+        st.markdown(message["content"])
+
+# Entrada do usuário
+user_input = st.chat_input("Digite aqui...")
 
 if user_input:
-    st.session_state.messages.append({"role": "user", "content": user_input})
+    # Salvar mensagem do usuário
+    st.session_state.messages.append({
+        "role": "user",
+        "content": user_input
+    })
+
+    # Mostrar mensagem do usuário
+    with st.chat_message("user"):
+        st.markdown(user_input)
+
+    # Gerar resposta da IA
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[
+            {"role": "system", "content": system_prompt},
+            *st.session_state.messages
+        ]
+    )
+
+    resposta = response.choices[0].message.content
+
+    # Salvar resposta
+    st.session_state.messages.append({
+        "role": "assistant",
+        "content": resposta
+    })
+
+    # Mostrar resposta
+    with st.chat_message("assistant"):
+        st.markdown(resposta)
