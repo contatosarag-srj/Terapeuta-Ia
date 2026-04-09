@@ -60,22 +60,14 @@ if user_input:
 
     # Gerar resposta da IA
     response = client.responses.create(
-    model="gpt-4.1-mini",
-    input=[
-        {"role": "system", "content": system_prompt},
-        *st.session_state.messages
-    ]
-)
+        model="gpt-4.1-mini",
+        input=[
+            {"role": "system", "content": system_prompt},
+            *st.session_state.messages
+        ]
+    )
 
-resposta = response.output[0].content[0].text
-
-st.session_state.messages.append({
-    "role": "assistant",
-    "content": resposta
-})
-
-with st.chat_message("assistant"):
-    st.markdown(resposta)
+    resposta = response.output_text
 
     # Salvar resposta
     st.session_state.messages.append({
