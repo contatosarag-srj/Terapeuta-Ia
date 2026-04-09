@@ -67,7 +67,7 @@ if user_input:
     ]
 )
 
-resposta = response.output_text
+resposta = response.output[0].content[0].text
 
 st.session_state.messages.append({
     "role": "assistant",
